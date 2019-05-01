@@ -73,3 +73,43 @@
 
   ([] (day2-2 input2)))
 
+; DAY 3
+
+(def input3 (clojure.string/trim-newline (slurp "data/input3.txt")))
+
+(defn get-initial-state []
+  {:pos [0 0] 
+  :visited {[0 0] 1}}) 
+
+(def moves {\> [1 0],  \< [-1 0], \^ [0 -1], \v [0 1]})
+
+(defn walk-a-trip [trip initial-state]
+  (reduce (fn [{:keys [pos visited]} ch] 
+            (let [new-pos (map + pos (moves ch))]
+              {:pos new-pos
+              :visited (update-in visited [new-pos] #(if % (inc %) 1))}))
+          initial-state
+          trip))
+
+; DAY 3 - part 1
+
+(defn day3 
+  ([trip] (->> (get-initial-state)
+               (walk-a-trip trip)
+               (:visited)
+               (count)))
+  ([] (day3 input3)))             
+
+; DAY 3 - part 2
+
+(defn transpose [xs] (apply map list (partition 2 xs)))
+
+(defn day3-2 
+  ([trip] (let [[odd-trip even-trip] (transpose trip)
+                state (assoc (walk-a-trip odd-trip (get-initial-state)) :pos [0 0])]
+            (->> state    
+                 (walk-a-trip even-trip)
+                 (:visited)
+                 (count))))
+  ([] (day3-2 input3)))
+
