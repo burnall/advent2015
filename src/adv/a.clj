@@ -33,7 +33,6 @@
   ([] (day1-2 input1)))
 
 ; DAY 2
-
 (defn parse-dim-line [s] 
   (-> s
       (split #"x")
@@ -46,7 +45,6 @@
        (map parse-dim-line)))
 
 ; DAY 2 - part 1
-
 (defn get-total-wrapping [dimensions] 
   (let [[a b c] (sort dimensions)]
     (+ (* 2 (+ (* a b) (* a c) (* b c))) 
@@ -59,7 +57,6 @@
   ([] (day2 input2))) 
 
 ; DAY2 - part 2
-
 (defn get-total-ribbon [dimensions] 
   (let [[a b c] (sort dimensions)]
     (+ (* a b c)
@@ -74,7 +71,6 @@
   ([] (day2-2 input2)))
 
 ; DAY 3
-
 (def input3 (clojure.string/trim-newline (slurp "data/input3.txt")))
 
 (defn get-initial-state []
@@ -92,7 +88,6 @@
           trip))
 
 ; DAY 3 - part 1
-
 (defn day3 
   ([trip] (->> (get-initial-state)
                (walk-a-trip trip)
@@ -101,7 +96,6 @@
   ([] (day3 input3)))             
 
 ; DAY 3 - part 2
-
 (defn transpose [xs] (apply map list (partition 2 xs)))
 
 (defn day3-2 
@@ -113,3 +107,25 @@
                  (count))))
   ([] (day3-2 input3)))
 
+; DAY 4 
+(defn hash-string
+  "Use java interop to flexibly hash strings"
+  [string algo base]
+  (let [hashed
+        (doto (java.security.MessageDigest/getInstance algo)
+          (.reset)
+          (.update (.getBytes string)))]
+    (format "%032x" (new java.math.BigInteger 1 (.digest hashed)))))
+
+(defn hash-md5
+  "Generate a md5 checksum for the given string"
+  [string]
+  (hash-string string "MD5" 16))
+
+(defn day4 
+  ([prefix, zero-count] (->> (range)
+                 (map (fn [i] [i (hash-md5 (str prefix i))]))
+                 (filter (fn [[i md5]] (= (apply str (repeat zero-count \0))  (subs md5 0 zero-count))))
+                 (take 1)))
+  ([zero-count] (day4 "bgvyzdsv" zero-count))) 
+  
