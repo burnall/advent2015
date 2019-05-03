@@ -128,4 +128,53 @@
                  (filter (fn [[i md5]] (= (apply str (repeat zero-count \0))  (subs md5 0 zero-count))))
                  (take 1)))
   ([zero-count] (day4 "bgvyzdsv" zero-count))) 
-  
+ 
+ ; DAY 5
+(def input5 (split-lines (slurp "data/input5.txt")))
+ 
+(defn pred1 [s] 
+ (let [vowels #{\a \e \i \o \u}]
+   (= 3
+   (reduce (fn [cnt ch]
+             (if (vowels ch) 
+               (if (= cnt 2) 
+                 (reduced 3)
+                 (inc cnt))
+               cnt))
+           0
+           s))))
+ 
+ (defn pred2 [s]
+   (= true
+     (reduce (fn [prev ch] 
+               (if (= prev ch) 
+                 (reduced true)
+                 ch))
+             s)))
+
+(defn pred3 [s]
+  (not (re-find #"ab|cd|pq|xy" s)))
+
+(defn day5 
+   ([words] (->> words
+                 (filter pred1)
+                 (filter pred2)
+                 (filter pred3)
+                 (count)))
+   ([] (day5 input5)))
+
+; DAY 5 - part 2
+(defn pred4 [s]
+  (some? (re-find #"(..).*\1" s))) 
+
+(defn pred5 [s]
+  (some? (re-find #"(.).\1" s)))
+
+(defn day5-2 
+   ([words] (->> words
+                 (filter pred4)
+                 (filter pred5)
+                 (count)))
+   ([] (day5-2 input5)))
+
+
