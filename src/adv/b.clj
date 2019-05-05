@@ -151,7 +151,21 @@
       solved-wires
       (recur {:solved-wires sw, :clauses cls}))))
 
+; Part 1
 (defn day7 
   ([clauses] (solve-circuit (get-initial-circuit clauses)))
   ([] (day7 input7)))
+
+; Part 2
+(defn day7-2 
+  ([clauses] 
+    (let [base (solve-circuit (get-initial-circuit clauses))
+          a-signal (base "a")]
+      (->> clauses
+           (filter #(not= "b" (:to %)))
+           (#(conj % {:t :signal, :signal a-signal, :to "b"}))
+           (get-initial-circuit)
+           (solve-circuit))))
+      
+  ([] (day7-2 input7)))
   
