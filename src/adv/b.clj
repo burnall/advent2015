@@ -8,6 +8,9 @@
 (defn split-lines [text]
   (split text #"\n"))
 
+(defn is-digit [c]
+  (and (>= (int c) (int \0)) (<= (int c) (int \9))))
+
 ; DAY 6
 (def re-command #"(.+) (\d+),(\d+) through (\d+),(\d+)")
 
@@ -73,4 +76,82 @@
                                 (get-initial-grid) 
                                 cmds)))
   ([] (day6-2 input6)))
- 
+
+; DAY 7
+(defn bit-not-16 [n]
+  (- 65535 n))
+
+(defn bit-shift-left-16 [n times]
+  (-> n
+     (bit-shift-left times)
+     (bit-and 65535)))
+
+(def clause-re #"((\d+)|(\S+) (AND|OR) (\S+)|NOT (\S+)|(\S+) (LSHIFT|RSHIFT) (\d+)|(\S+)) -> (\S+)")
+
+(defn parse-var [clause v1 v2]
+  (-> clause
+      (#(if (is-digit (first v1)) 
+          (assoc % :e1 (parse-int v1))
+          (assoc % :w1 v1)))
+       (#(if (is-digit (first v2)) 
+          (assoc % :e2 (parse-int v2))
+          (assoc % :w2 v2)))))
+
+(defn read-clause [line]
+  (let [m (re-find clause-re line)
+        to (m 11)]
+    (cond 
+      (some? (m 2)) {:t :signal, :signal (parse-int (m 2)), :to to}
+      (some? (m 6)) {:t :not, :w1 (m 6), :to to}
+      (some? (m 3)) (parse-var {:t :binary, :op (if (= (m 4) "AND") bit-and bit-or), :to to} (m 3) (m 5))
+      (some? (m 7)) {:t :func, :op (if (= (m 8) "RSHIFT") bit-shift-right bit-shift-left-16), :w1 (m 7), :p1 (parse-int (m 9)), :to to}
+      (some? (m 10)) {:t :wire, :w1 (m 10), :to to})))
+
+(def input7 
+  (->> "data/input7.txt"
+       (slurp)
+       (split-lines)
+       (map read-clause)))
+
+(defn get-simple-wires [clauses]
+  (->> clauses
+       (filter #(= (:t %) :signal))
+       (map #(vector (:to %) (:signal %)))
+       (into {})))
+
+(defn get-initial-circuit [clauses]
+  {:solved-wires (get-simple-wires clauses) ; map
+   :clauses (set clauses) ; set
+  }) 
+
+(defn solve-clause [clause solved-wires]
+  (case (:t clause)
+    :signal (:signal clause)
+    :not (when-let [s1 (solved-wires (:w1 clause))] 
+           (bit-not-16 s1))
+    :binary (let [s1 (or (:e1 clause) (solved-wires (:w1 clause))) 
+              s2 (or (:e2 clause) (solved-wires (:w2 clause)))]
+              (when (and (some? s1) (some? s2)) ((:op clause) s1 s2)))
+    :func (when-let [s1 (solved-wires (:w1 clause))]
+            ((:op clause) s1 (:p1 clause)))  
+    :wire (solved-wires (:w1 clause))))
+
+
+(defn search-clauses [{:keys [solved-wires clauses]}]
+  (reduce (fn [[sw active-clauses] clause] 
+             (if-let [solved (solve-clause clause sw)]
+               [(assoc sw (:to clause) solved) (disj active-clauses clause)]
+               [sw active-clauses]))
+          [solved-wires clauses]
+          clauses))
+
+(defn solve-circuit [{:keys [solved-wires clauses] :as circuit}]
+  (let [[sw cls] (search-clauses circuit)]
+    (if (= (count clauses) (count cls))
+      solved-wires
+      (recur {:solved-wires sw, :clauses cls}))))
+
+(defn day7 
+  ([clauses] (solve-circuit (get-initial-circuit clauses)))
+  ([] (day7 input7)))
+  
