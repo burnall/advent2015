@@ -1,16 +1,10 @@
-(ns adv.a)
+(ns adv.a
+  (:require [adv.util :refer [split split-lines parse-int is-digit]]))
 
-;https://adventofcode.com/2015/
-
-; Utility
-(defn parseInt[s] (Integer/parseInt s))
-
-(def split clojure.string/split)
-
-(defn split-lines [text]
-  (split text #"\n"))
+; htps://adventofcode.com/2015/
 
 ; DAY 1
+
 (def input1 (slurp "data/input1.txt"))
 
 ; DAY 1 - part 1
@@ -36,7 +30,7 @@
 (defn parse-dim-line [s] 
   (-> s
       (split #"x")
-      (#(map parseInt %))))
+      (#(map parse-int %))))
 
 (def input2 
   (->> "data/input2.txt"
@@ -56,7 +50,7 @@
                    (reduce +)))
   ([] (day2 input2))) 
 
-; DAY2 - part 2
+; DAY 2 - part 2
 (defn get-total-ribbon [dimensions] 
   (let [[a b c] (sort dimensions)]
     (+ (* a b c)

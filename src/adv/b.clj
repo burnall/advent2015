@@ -1,15 +1,5 @@
-(ns adv.b)
-
-; Utility
-(defn parse-int [s] (Integer/parseInt s))
-
-(def split clojure.string/split)
-
-(defn split-lines [text]
-  (split text #"\n"))
-
-(defn is-digit [c]
-  (and (>= (int c) (int \0)) (<= (int c) (int \9))))
+(ns adv.b
+  (:require [adv.util :refer [split-lines parse-int is-digit]]))
 
 ; DAY 6
 (def re-command #"(.+) (\d+),(\d+) through (\d+),(\d+)")
