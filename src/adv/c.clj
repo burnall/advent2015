@@ -1,5 +1,5 @@
 (ns adv.c
-  (:require [adv.util :as util :refer [split-lines]]))
+  (:require [adv.util :as util :refer [split-lines parse-int]]))
 
 ; DAY 8
 (def input8 
@@ -48,3 +48,71 @@
                 (reduce + 0)))
 
   ([] (day8-2 input8)))
+
+ ; DAY 9
+
+(defn parse-distance [line] 
+  (let [[_ town1 town2 distance]  (re-find #"(\w+) to (\w+) = (\d+)" line)]
+    {:town1 town1, :town2 town2, :distance (parse-int distance)}))
+
+(defn add-to-town-ids [town-ids town] 
+  (if (get town-ids town)
+    town-ids
+    (assoc town-ids town (count town-ids))))
+
+(defn get-distance-config [distance-objs]
+  (->> distance-objs
+      (reduce (fn [{:keys [town-ids distances]} {:keys [town1 town2 distance]}]
+                (let [town-ids (add-to-town-ids (add-to-town-ids town-ids town1) town2)
+                      id1 (get town-ids town1)
+                      id2 (get town-ids town2)]
+                  {:town-ids town-ids
+                  :distances (assoc-in (assoc-in distances [id1 id2] distance) [id2 id1] distance)}))
+              {:town-ids {}, 
+              :distances (mapv (fn [_] (apply vector (repeat 10 0))) (range 10))})))
+
+(def input9 
+   (->>  "data/input9.txt"
+         (slurp)
+         (split-lines)
+         (map parse-distance)
+         (get-distance-config)))
+
+(defn insert-at [xs i x]
+  (let [[a b] (split-at i xs)]
+    (vec (concat a [x] b))))
+
+(defn permutate [x comb]
+  (map #(insert-at comb % x)
+       (range (inc (count comb)))))
+
+(defn permutations [xs] 
+  (reduce (fn [combinations x] 
+            (->> combinations
+                 (map (partial permutate x))
+                 (apply concat)))
+           [[]]
+           xs))
+
+(defn total-distance [distances route]
+  (->> (dec (count route))
+       (range)
+       (map #(get-in distances [(route %) (route (inc %))]))
+       (reduce +))) 
+
+(defn day9 
+  ([{:keys [town-ids distances]} agg-func] 
+    (->> town-ids
+         (count)
+         (range)
+         (permutations)
+         (map (partial total-distance distances))
+         (apply agg-func)))
+
+  ([] (day9 input9 min)))
+
+; Part 2
+(defn day9-2 [] (day9 input9 max)) 
+
+
+
