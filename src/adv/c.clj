@@ -114,5 +114,28 @@
 ; Part 2
 (defn day9-2 [] (day9 input9 max)) 
 
+; Day 10
+
+(defn number-to-digits [n]
+  (->> n
+       (str)
+       (map #(- (int %) (int (char \0))))))  
+
+(defn look-and-say [digits]
+  (->> digits
+       (partition-by identity)
+       (mapcat (fn [ds] [(count ds) (first ds)]))))
+
+(defn day10 
+  ([n times] 
+    (->> n
+         (number-to-digits)
+         (iterate look-and-say)
+         (#(nth % times))
+         (count)))
+  ([] (day10 3113322113 40)))
+
+(defn day10-2 [] 
+  (day10 3113322113 50))
 
 
