@@ -67,3 +67,19 @@
 
 (defn day11-2 []
   (day11 (day11)))
+
+; DAY 12
+
+(def input12 (slurp "data/input12.txt"))
+
+(defn json-sum [json]
+  (->> json
+       (re-seq #"(-?\d+)")
+       (map first)
+       (map parse-int)
+       (reduce +)))
+
+(defn day12
+  ([json] (json-sum json))
+  ([] (day12 input12)))
+
