@@ -65,4 +65,27 @@
   ([config] (day13 (tweak-person-config config) max))
   ([] (day13-2 input13)))
 
+; Day 14
 
+(def input14 
+   (->> "data/input14.txt"
+         (slurp)
+         (split-lines)
+         (map #(re-seq #"(\w+) can fly (\d+) km/s for (\d+) seconds, but then must rest for (\d+) seconds." %))
+         (map first)
+         (map (fn [[_ nickname speed span pause]] 
+                {:nickname nickname
+                :speed (parse-int speed)
+                :span (parse-int span)
+                :pause (parse-int pause)})))) 
+
+(defn get-distance [duration {:keys [speed span pause]}]
+  (+ (* speed span (quot duration (+ span pause)))
+     (* speed (min (mod duration (+ span pause)) span))))       
+
+(defn day14 
+  ([reindeers duration] 
+    (->> reindeers 
+         (map (partial get-distance duration))
+         (apply max)))
+  ([] (day14 input14 2503))) 
