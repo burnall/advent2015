@@ -1,5 +1,5 @@
 (ns adv.c
-  (:require [adv.util :as util :refer [split-lines parse-int]]))
+  (:require [adv.util :as util :refer [split-lines parse-int permutations]]))
 
 ; DAY 8
 (def input8 
@@ -77,22 +77,6 @@
          (split-lines)
          (map parse-distance)
          (get-distance-config)))
-
-(defn insert-at [xs i x]
-  (let [[a b] (split-at i xs)]
-    (vec (concat a [x] b))))
-
-(defn permutate [x comb]
-  (map #(insert-at comb % x)
-       (range (inc (count comb)))))
-
-(defn permutations [xs] 
-  (reduce (fn [combinations x] 
-            (->> combinations
-                 (map (partial permutate x))
-                 (apply concat)))
-           [[]]
-           xs))
 
 (defn total-distance [distances route]
   (->> (dec (count route))
