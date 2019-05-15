@@ -56,4 +56,13 @@
 
   ([] (day13 input13 max)))
 
+; Day 13 - Part 2
+(defn tweak-person-config [{:keys [person-ids rels]}]
+  {:person-ids (assoc person-ids "me" (count person-ids)) 
+  :rels rels}) ; Dirty trick
+
+(defn day13-2 
+  ([config] (day13 (tweak-person-config config) max))
+  ([] (day13-2 input13)))
+
 
