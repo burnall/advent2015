@@ -88,4 +88,25 @@
     (->> reindeers 
          (map (partial get-distance duration))
          (apply max)))
-  ([] (day14 input14 2503))) 
+  ([] (day14 input14 2503)))
+
+; Day 14 - part 2
+(defn get-leaders [reindeers duration]
+  (let [results (map (fn [r] [(:nickname r) (get-distance duration r)]) 
+                      reindeers)
+       max-distance (apply max (map second results))]                 
+    (->> results
+         (filter #(= max-distance (second %)))
+         (map first))))
+
+(defn day14-2 
+  ([reindeers duration] 
+    (->> (inc duration)
+         (range 1)
+         (mapcat (partial get-leaders reindeers))
+         (frequencies)))
+        
+  ([] (day14-2 input14 2503)))
+
+
+
