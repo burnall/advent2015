@@ -17,7 +17,7 @@
   (map ingredient [:capacity :durability :flavor :texture]))
 
 (def input15 
-  (->> "data/input15-small.txt"
+  (->> "data/input15.txt"
        (slurp)
        (split-lines)
        (map parse-ingredients)))
@@ -48,3 +48,24 @@
 
 
   ([] (day15 input15 100)))
+
+
+; Day 15 - part 2
+(defn calories? [ingredients amounts]
+  (->> (map (fn [ingredient amount]
+              (* (:calories ingredient) amount))
+            ingredients
+            amounts)
+       (reduce +)
+       (= 500)))
+
+ (defn day15-2
+  ([ingredients amount] 
+    (let [ingredients-v (map ingredient-to-vector ingredients)]
+      (->>  (count ingredients-v)
+            (split-amount amount)
+            (filter (partial calories? ingredients)) 
+            (map (partial measure-properties ingredients-v))
+            (apply max))))
+
+  ([] (day15-2 input15 100))) 
