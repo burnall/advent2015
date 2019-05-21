@@ -69,3 +69,48 @@
             (apply max))))
 
   ([] (day15-2 input15 100))) 
+
+; Day 16
+
+(defn parse-sues [line]
+  (->> line
+       (re-seq #"Sue (\d+): (\w+): (\d+), (\w+): (\d+), (\w+): (\d+)")
+       (first)
+       ((fn [[_ id sign1 amount1 sign2 amount2 sign3 amount3]]
+         {:id id, :signs [[sign1 amount1] [sign2 amount2] [sign3 amount3]]}))
+       ((fn [obj] 
+          (reduce (fn [agg [sign amount]]
+                    (assoc agg (keyword sign) (parse-int amount)))
+                  {:id (:id obj)}
+                  (:signs obj)))))) 
+
+(def input16 
+  (->> "data/input16.txt"
+       (slurp)
+       (split-lines)
+       (map parse-sues)))
+
+(def input16-2
+  (->> "data/input16-2.txt"
+       (slurp)
+       (split-lines)
+       (map (partial re-seq #"(\w+): (\d+)"))
+       (map first)
+       (map (fn [[_ sign amount]] [(keyword sign) (parse-int amount)]))))
+
+(defn build-predicate [signs]
+  (fn [sue]
+    (reduce (fn [res [sign amount]]
+              (or (nil? (sign sue))
+                  (= (sign sue) amount)
+                  (reduced false)))
+            true
+            signs)))
+
+(defn day16
+  ([sues signs]
+    (->> sues 
+         (filter (build-predicate signs))))
+  ([] (day16 input16 input16-2)))
+
+
