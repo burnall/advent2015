@@ -98,11 +98,15 @@
        (map first)
        (map (fn [[_ sign amount]] [(keyword sign) (parse-int amount)]))))
 
-(defn build-predicate [signs]
+(defn default-predicate-for-sign [sign]
+  (fn [sue amount]
+    (or (nil? (sign sue))
+        (= (sign sue) amount))))
+
+(defn build-predicate [signs predicate-for-sign]
   (fn [sue]
     (reduce (fn [res [sign amount]]
-              (or (nil? (sign sue))
-                  (= (sign sue) amount)
+              (or ((predicate-for-sign sign) sue amount)
                   (reduced false)))
             true
             signs)))
@@ -110,7 +114,28 @@
 (defn day16
   ([sues signs]
     (->> sues 
-         (filter (build-predicate signs))))
+         (filter (build-predicate signs default-predicate-for-sign))))
   ([] (day16 input16 input16-2)))
 
+; Day 16 - part 2
+(defn other-predicate-for-sign [sign]
+  (cond 
+    (or (= sign :cats) (= sign :trees))
+      (fn [sue amount]
+        (or (nil? (sign sue))
+            (> (sign sue) amount)))
+    (or (= sign :pomeranians) (= sign :goldfish))
+      (fn [sue amount]
+        (or (nil? (sign sue))
+            (< (sign sue) amount)))
+    :default  
+      (fn [sue amount]
+        (or (nil? (sign sue))
+            (= (sign sue) amount)))))
+
+(defn day16-2
+  ([sues signs]
+    (->> sues 
+         (filter (build-predicate signs other-predicate-for-sign))))
+  ([] (day16-2 input16 input16-2)))
 
