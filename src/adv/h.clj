@@ -21,7 +21,7 @@
      :ruleset (get-ruleset (subvec xs 0 (dec last-index)))})) 
 
 (def input19
-  (->> "data/input19.txt"
+  (->> "data/input19-small.txt"
        (slurp)
        (split-lines)
        (build-config)))
@@ -33,13 +33,35 @@
                                   to
                                   (subvec molecule (inc i))))))))
 
-(defn mutate [molecule ruleset]
+(defn mutate [ruleset molecule]
   (->> (count molecule)
        (range)
        (mapcat (partial mutate-position molecule ruleset))
        (distinct)))
 
 (defn day19 
-  ([{:keys [molecule ruleset]}] (count (mutate molecule ruleset)))
+  ([{:keys [molecule ruleset]}] (count (mutate ruleset molecule)))
   ([] (day19 input19)))
+
+; Part 2
+
+(defn mutate-many [ruleset molecules]
+  (->> molecules
+       (mapcat (partial mutate ruleset))
+       (distinct)))
+
+; Appropriate for very small molecules only
+(defn search-breadth [{:keys [molecule ruleset]}]
+  (->> [["e"]]
+       (iterate (partial mutate-many ruleset))
+       (map (fn [i molecules] 
+              (and (seq (filter (partial = molecule)  molecules)) i)) 
+            (range))
+       (filter boolean)
+       (first)))
+
+(defn day19-2 
+  ([] (day19-2 input19)))
+
+
 
