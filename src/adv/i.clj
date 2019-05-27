@@ -37,20 +37,33 @@
   (->> (iterate (partial * base) 1)
        (take (inc exp))))
 
-(defn get-sum-all-factors [n]
+(defn filter-factors-default [n factor]
+  true)
+
+(defn get-sum-all-factors [filter-factors n]
   (if (prime-set n)
     (inc n)
     (->> (get-prime-factors n)
          (frequencies)
          (map (partial apply get-exp-factors))
          (reduce join-factors [1])
+         (filter (partial filter-factors n))
          (reduce +))))
               
-(defn day20 [goal limit]
-  (->> limit
-       (range 2)
-       (map (juxt get-sum-all-factors identity))
-       (filter (fn [[sumf n]] (>= sumf goal)))
-       (first)))
-       
-    
+(defn day20 
+  ([goal limit filter-factors] 
+    (->> limit
+         (range 2)
+         (map (juxt (partial get-sum-all-factors filter-factors) identity))
+         (filter (fn [[sumf n]] (>= sumf goal)))
+         (first)))
+  ([goal limit] (day20 goal limit filter-factors-default)))       
+
+; Part 2
+(defn filter-factors-by-quote [quote n factor]
+   (>= quote (/ n factor)))  
+
+(defn day20-2 [goal limit quote]
+  (day20 goal limit (partial filter-factors-by-quote quote)))
+
+
