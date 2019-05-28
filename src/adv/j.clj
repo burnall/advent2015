@@ -62,8 +62,8 @@
   (Math/ceil (/ hp damage))) 
 
 (defn win? [{boss-hp :hp, boss-damage :damage, boss-armor :armor} {:keys [hp damage armor]}]
-  (let [afflicted (if (< damage boss-armor) 1 (- damage boss-armor))
-        received (if (< boss-damage armor) 1 (- boss-damage armor))]
+  (let [afflicted (if (<= damage boss-armor) 1 (- damage boss-armor))
+        received (if (<= boss-damage armor) 1 (- boss-damage armor))]
     (<= (moves-to-kill boss-hp afflicted) (moves-to-kill hp received))))      
 
 (defn day21 
@@ -75,3 +75,14 @@
          (filter (partial win? boss))
          (first)))
   ([] (day21 100 {:hp 104, :damage 8, :armor 1})))
+
+; Part 2
+(defn day21-2 
+  ([hp-player boss]
+    (->> combinations
+         (map evaluate)
+         (sort-by (comp - :cost))
+         (map #(assoc % :hp hp-player))
+         (filter (comp not (partial win? boss)))
+         (first)))
+  ([] (day21-2 100 {:hp 104, :damage 8, :armor 1})))
