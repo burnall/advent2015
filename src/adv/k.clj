@@ -1,12 +1,12 @@
 (ns adv.k)
 
-(def spells [
-  {:id 1, :name "magic missile", :mana 53,  :damage 4 :heal 0}
-  {:id 2, :name "drain", :mana 73, :damage 2, :heal 2}
+(def spells (sort-by :id [
+  {:id 4, :name "magic missile", :mana 53,  :damage 4 :heal 0}
+  {:id 5, :name "drain", :mana 73, :damage 2, :heal 2}
   {:id 3, :name "shield", :mana 113, :armor-inc 7, :effect 6}
-  {:id 4, :name "poison", :mana 173, :damage 3, :effect 6}
-  {:id 5, :name "recharge", :mana 229, :mana-inc 101, :effect 5}
-  ])
+  {:id 1, :name "poison", :mana 173, :damage 3, :effect 6}
+  {:id 2, :name "recharge", :mana 229, :mana-inc 101, :effect 5}
+  ]))
 
 (defn get-initial-state [boss player]
   {:turn :player
@@ -74,12 +74,17 @@
                               active-effects))
             spells))
 
-(defn do-player-turn [current-best state] 
-  (let [state (apply-effects state)]
-    (->> spells 
-         (filter-spells (:effects state)) 
-         (reduce (partial do-player-spell state) 
-                 current-best))))
+(defn do-player-turn [current-best state]
+  ; Here is changes for part 2
+  (let [hp (dec (get-in state [:player :hp]))]
+    (if (zero? hp)
+      current-best
+      (let [state (assoc-in state [:player :hp] hp) 
+            state (apply-effects state)]
+        (->> spells 
+             (filter-spells (:effects state)) 
+             (reduce (partial do-player-spell state) 
+                     current-best))))))
 
 (defn branch [current-best state]
   (if (= :boss (:turn state))
