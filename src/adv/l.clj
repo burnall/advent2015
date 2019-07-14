@@ -48,5 +48,3 @@
 
   ([] (run-program input23)))
 
-
-
