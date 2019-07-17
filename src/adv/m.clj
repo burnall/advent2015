@@ -23,8 +23,9 @@
 (defn search-depth [packages current-solution best] 
   (cond 
     (not (better-solution? current-solution best)) best
-    (and (= (:spent current-solution) (:goal current-solution)) 
-         (splittable-in-two? packages (:els current-solution))) current-solution
+    ;(and (= (:spent current-solution) (:goal current-solution)) 
+    ;     (splittable-in-two? packages (:els current-solution))) current-solution
+    (= (:spent current-solution) (:goal current-solution)) current-solution
     (= (:pos current-solution) (count packages)) best
     :else (evaluate-branches packages current-solution best)))
 
@@ -88,7 +89,7 @@
 (defn get-goal [packages]
   (->> packages 
        (reduce +)
-       (#(quot % 3))))
+       (#(quot % 4))))
 
 (defn day24 
   ([packages] (search-depth packages {:cnt 0, :els [], :qe 1, :pos 0, :spent 0, :goal (get-goal packages)} {:cnt 1000}))
